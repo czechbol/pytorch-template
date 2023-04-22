@@ -1,4 +1,4 @@
-# PyTorch Template Project
+# Typed PyTorch Template Project
 <p align="center">
   <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/torch?style=flat-square">
   <a href="https://github.com/czechbol/pytorch-template/graphs/commit-activity"><img src="https://img.shields.io/github/last-commit/czechbol/pytorch-template?style=flat-square" alt="Maintenance" /></a>
@@ -7,13 +7,13 @@
   <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" alt="Formatted with Black" /></a>
 </p>
 
-PyTorch deep learning project made easy.
+PyTorch deep learning project made easy. Now with Type hints!
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [PyTorch Template Project](#pytorch-template-project)
+- [Typed PyTorch Template Project](#typed-pytorch-template-project)
   - [Requirements](#requirements)
   - [Features](#features)
   - [Folder Structure](#folder-structure)
@@ -46,6 +46,19 @@ PyTorch deep learning project made easy.
 * PyTorch >= 1.2 (2.0 recommended)
 * tqdm (Optional for `test.py`)
 * tensorboard >= 1.14 (see [Tensorboard Visualization](#tensorboard-visualization))
+
+It is recommended that you setup at most Python 3.10 virtual environment as of
+this time as many packages aren't available for Python 3.11 yet.
+
+Linux setup:
+```bash
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+# Check if the environment is correctly initialized
+$ which python # should output something like: ~/path/to/project/.venv/bin/python
+$ python -m pip --upgrade pip
+$ python -m pip install -r requirements.txt
+```
 
 ## Features
 * Clear folder structure which is suitable for many deep learning projects.
