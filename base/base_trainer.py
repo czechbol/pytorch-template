@@ -1,3 +1,4 @@
+import sys
 from abc import abstractmethod
 from typing import Callable, List, Type, Union
 
@@ -48,9 +49,14 @@ class BaseTrainer:
             self.mnt_best = 0
         else:
             self.mnt_mode, self.mnt_metric = self.monitor.split()
-            assert self.mnt_mode in ["min", "max"]
+            if self.mnt_mode not in ["min", "max"]:
+                raise ValueError(
+                    f"monitor mode {self.mnt_mode} is unknown, use'min' or'max'"
+                )
 
-            self.mnt_best = int(inf) if self.mnt_mode == "min" else int(-inf)
+            self.mnt_best = (
+                sys.maxsize if self.mnt_mode == "min" else (-sys.maxsize - 1)
+            )
             self.early_stop: int = cfg_trainer.get("early_stop", inf)
             if self.early_stop <= 0:
                 self.early_stop = int(inf)

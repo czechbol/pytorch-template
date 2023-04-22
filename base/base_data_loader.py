@@ -78,12 +78,14 @@ class BaseDataLoader(DataLoader):
         np.random.shuffle(idx_full)
 
         if isinstance(split, int):
-            assert split > 0
-            assert (
-                split < self.n_samples
-            ), "validation set size is configured to be larger than entire dataset."
+            if split <= 0 or split > self.n_samples:
+                raise ValueError(
+                    f"Validation split as an int must be between 0 and {self.n_samples}."
+                )
             len_valid = split
         else:
+            if split < 0 or split > 1:
+                raise ValueError("Validation split as a float must be between 0 and 1.")
             len_valid = int(self.n_samples * split)
 
         valid_idx = idx_full[0:len_valid]

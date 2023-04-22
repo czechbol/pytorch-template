@@ -70,8 +70,6 @@ class ConfigParser:
             resume_path = Path(resume)
             cfg_fname = str(resume_path.parent / "config.json")
         else:
-            msg_no_cfg = "Configuration file need to be specified. Add '-c config.json', for example."
-            assert args.config != "", msg_no_cfg
             resume = None
             cfg_fname = args.config
 
@@ -99,16 +97,16 @@ class ConfigParser:
         """
         module_name = self[name]["type"]
         module_args = dict(self[name]["args"])
-        assert all(
-            [k not in module_args for k in kwargs]
-        ), "Overwriting kwargs given in config file is not allowed"
+        if not all([k not in module_args for k in kwargs]):
+            raise ValueError("Overwriting kwargs given in config file is not allowed")
         module_args.update(kwargs)
         return getattr(module, module_name)(*args, **module_args)
 
     def init_ftn(self, name, module, *args, **kwargs) -> partial:
         """
-        Finds a function handle with the name given as 'type' in config, and returns the
-        function with given arguments fixed with functools.partial.
+        Find a function handle with the name given as 'type' in config.
+
+        Returns the function with given arguments fixed with functools.partial.
 
         `function = config.init_ftn('name', module, a, b=1)`
         is equivalent to
@@ -116,9 +114,8 @@ class ConfigParser:
         """
         module_name = self[name]["type"]
         module_args = dict(self[name]["args"])
-        assert all(
-            [k not in module_args for k in kwargs]
-        ), "Overwriting kwargs given in config file is not allowed"
+        if all([k in module_args for k in kwargs]):
+            raise ValueError("Overwriting kwargs given in config file is not allowed")
         module_args.update(kwargs)
         return partial(getattr(module, module_name), *args, **module_args)
 
@@ -127,10 +124,20 @@ class ConfigParser:
         return self.config[name]
 
     def get_logger(self, name, verbosity=2) -> logging.Logger:
-        msg_verbosity = "verbosity option {} is invalid. Valid options are {}.".format(
-            verbosity, self.log_levels.keys()
-        )
-        assert verbosity in self.log_levels, msg_verbosity
+        """Get a logger with the given name.
+
+        Args:
+            name (str): Name of the logger.
+            verbosity (int): Verbosity level of the logger.
+
+        Returns:
+            logging.Logger: Logger with the given name.
+        """
+        if verbosity not in self.log_levels:
+            raise ValueError(
+                f"verbosity option {verbosity} is invalid. Valid options are {self.log_levels.keys()}."
+            )
+
         logger = logging.getLogger(name)
         logger.setLevel(self.log_levels[verbosity])
         return logger
