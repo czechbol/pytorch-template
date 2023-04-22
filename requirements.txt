@@ -1,6 +1,6 @@
-torch>=2.0
-torchvision
 numpy
 pandas
-tqdm
 tensorboard>=2.12
+torch>=2.0
+torchvision
+tqdm

@@ -1,4 +1,7 @@
-flake8
-black
-mypy
 bandit
+black
+flake8
+flake8-print
+mypy
+pandas-stubs
+pre-commit

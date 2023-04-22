@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: check-shebang-scripts-are-executable
+      - id: pretty-format-json
+        args: [--autofix, --indent=2, --no-ensure-ascii]
+
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/flake8
+    rev: "6.0.0"
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: "1.7.5"
+    hooks:
+      - id: bandit
+        args: [--skip=B101]
+# In case someone wants to fix more type errors
+#  - repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: "v1.2.0"
+#    hooks:
+#      - id: mypy
+#        additional_dependencies: [numpy]
