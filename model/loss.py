@@ -1,5 +1,5 @@
-import torch.nn.functional as F
 import torch
+import torch.nn.functional as F
 
 
 def nll_loss(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
