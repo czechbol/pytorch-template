@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 
 import torch
@@ -10,7 +12,7 @@ import model.model as module_arch
 from parse_config import ConfigParser
 
 
-def main(config):
+def main(config: ConfigParser):
     logger = config.get_logger("test")
 
     # setup data_loader instances
@@ -74,20 +76,14 @@ def main(config):
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="PyTorch Template")
-    args.add_argument(
-        "-c",
-        "--config",
-        default="",
-        type=str,
-        help="config file path (default: None)",
-    )
+    args = argparse.ArgumentParser(description="PyTorch Template Test Utility")
     args.add_argument(
         "-r",
         "--resume",
         default="",
         type=str,
-        help="path to latest checkpoint (default: None)",
+        help="path to latest checkpoint (default: '')",
+        required=True,
     )
     args.add_argument(
         "-d",

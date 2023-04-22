@@ -1,14 +1,16 @@
+#!/usr/bin/env python
+
 import argparse
 from typing import Callable, List, Type, Union
 
 import numpy as np
 import torch
-from base.base_model import BaseModel
 
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
+from base.base_model import BaseModel
 from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
@@ -67,20 +69,20 @@ def main(config: ConfigParser) -> None:
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="PyTorch Template")
+    args = argparse.ArgumentParser(description="PyTorch Template Training")
     args.add_argument(
         "-c",
         "--config",
-        default="",
+        default="configs/mnist.json",
         type=str,
-        help="config file path (default: None)",
+        help="config file path (default: 'configs/mnist.json')",
     )
     args.add_argument(
         "-r",
         "--resume",
         default="",
         type=str,
-        help="path to latest checkpoint (default: None)",
+        help="path to latest checkpoint (default: '')",
     )
     args.add_argument(
         "-d",
