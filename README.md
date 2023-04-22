@@ -1,40 +1,49 @@
 # PyTorch Template Project
+<p align="center">
+  <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/torch?style=flat-square">
+  <a href="https://github.com/czechbol/pytorch-template/graphs/commit-activity"><img src="https://img.shields.io/github/last-commit/czechbol/pytorch-template?style=flat-square" alt="Maintenance" /></a>
+  <a href="https://github.com/czechbol/pytorch-template/actions"><img src="https://img.shields.io/github/actions/workflow/status/czechbol/pytorch-template/pre-commit.yml?style=flat-square" /></a>
+  <a href="https://github.com/czechbol/pytorch-template/blob/master/LICENSE"><img src="https://img.shields.io/github/license/czechbol/pytorch-template?style=flat-square" alt="GPLv3 license" /></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" alt="Formatted with Black" /></a>
+</p>
+
 PyTorch deep learning project made easy.
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-* [PyTorch Template Project](#pytorch-template-project)
-	* [Requirements](#requirements)
-	* [Features](#features)
-	* [Folder Structure](#folder-structure)
-	* [Usage](#usage)
-		* [Config file format](#config-file-format)
-		* [Using config files](#using-config-files)
-		* [Resuming from checkpoints](#resuming-from-checkpoints)
-    * [Using Multiple GPU](#using-multiple-gpu)
-	* [Customization](#customization)
-		* [Custom CLI options](#custom-cli-options)
-		* [Data Loader](#data-loader)
-		* [Trainer](#trainer)
-		* [Model](#model)
-		* [Loss](#loss)
-		* [metrics](#metrics)
-		* [Additional logging](#additional-logging)
-		* [Validation data](#validation-data)
-		* [Checkpoints](#checkpoints)
-    * [Tensorboard Visualization](#tensorboard-visualization)
-	* [Contribution](#contribution)
-	* [TODOs](#todos)
-	* [License](#license)
-	* [Acknowledgements](#acknowledgements)
+- [PyTorch Template Project](#pytorch-template-project)
+  - [Requirements](#requirements)
+  - [Features](#features)
+  - [Folder Structure](#folder-structure)
+  - [Usage](#usage)
+    - [Config file format](#config-file-format)
+    - [Using config files](#using-config-files)
+    - [Resuming from checkpoints](#resuming-from-checkpoints)
+    - [Using Multiple GPU](#using-multiple-gpu)
+  - [Customization](#customization)
+    - [Project initialization](#project-initialization)
+    - [Overriding config options](#overriding-config-options)
+    - [Data Loader](#data-loader)
+    - [Trainer](#trainer)
+    - [Model](#model)
+    - [Loss](#loss)
+    - [Metrics](#metrics)
+    - [Additional logging](#additional-logging)
+    - [Testing](#testing)
+    - [Validation data](#validation-data)
+    - [Checkpoints](#checkpoints)
+    - [Tensorboard Visualization](#tensorboard-visualization)
+  - [Contribution](#contribution)
+  - [License](#license)
+  - [Acknowledgements](#acknowledgements)
 
 <!-- /code_chunk_output -->
 
 ## Requirements
-* Python >= 3.5 (3.6 recommended)
-* PyTorch >= 0.4 (1.2 recommended)
+* Python >= 3.8
+* PyTorch >= 1.2 (2.0 recommended)
 * tqdm (Optional for `test.py`)
 * tensorboard >= 1.14 (see [Tensorboard Visualization](#tensorboard-visualization))
 
@@ -51,50 +60,53 @@ PyTorch deep learning project made easy.
 ## Folder Structure
   ```
   pytorch-template/
+  ├── LICENSE                   - Copyright information
+  ├── README.md                 - This file
+  ├── mypy.ini                  - Mypy configuration
+  ├── new_project.py            - Initialize new project with template files
+  ├── parse_config.py           - Class to handle config file and cli options
+  ├── requirements-dev.txt      - Development requirements
+  ├── requirements.txt          - Requirements to execute the project
+  ├── test.py                   - Main script to start training
+  ├── train.py                  - Main script to evaluate the model
   │
-  ├── train.py - main script to start training
-  ├── test.py - evaluation of trained model
-  │
-  ├── config.json - holds configuration for training
-  ├── parse_config.py - class to handle config file and cli options
-  │
-  ├── new_project.py - initialize new project with template files
-  │
-  ├── base/ - abstract base classes
+  ├── base/                     - abstract base classes
   │   ├── base_data_loader.py
   │   ├── base_model.py
   │   └── base_trainer.py
   │
-  ├── data_loader/ - anything about data loading goes here
+  ├── configs                   - Configuration settings directory
+  │   └── mnist.json            - Default MNIST model configuration
+  │
+  ├── data/                     - default directory for storing input data
+  │
+  ├── data_loader/              - anything about data loading goes here
   │   └── data_loaders.py
   │
-  ├── data/ - default directory for storing input data
+  ├── logger/                   - module for tensorboard visualization and logging
+  │   ├── logger_config.json
+  │   ├── logger.py
+  │   └── visualization.py
   │
-  ├── model/ - models, losses, and metrics
-  │   ├── model.py
+  ├── model/                    - models, losses, and metrics
+  │   ├── loss.py
   │   ├── metric.py
-  │   └── loss.py
+  │   └── model.py
   │
   ├── saved/
-  │   ├── models/ - trained models are saved here
-  │   └── log/ - default logdir for tensorboard and logging output
+  │   ├── log/                  - default logdir for tensorboard and logging output
+  │   └── models/               - trained models are saved here
   │
-  ├── trainer/ - trainers
+  ├── trainer/                  - trainers
   │   └── trainer.py
   │
-  ├── logger/ - module for tensorboard visualization and logging
-  │   ├── visualization.py
-  │   ├── logger.py
-  │   └── logger_config.json
-  │
-  └── utils/ - small utility functions
-      ├── util.py
-      └── ...
+  └── utils/                    - small utility functions
+      └── util.py
   ```
 
 ## Usage
 The code in this repo is an MNIST example of the template.
-Try `python train.py -c config.json` to run code.
+Try `python train.py -c configs/mnist.json` to run code.
 
 ### Config file format
 Config files are in `.json` format:
@@ -102,70 +114,67 @@ Config files are in `.json` format:
 {
   "name": "Mnist_LeNet",        // training session name
   "n_gpu": 1,                   // number of GPUs to use for training.
-
   "arch": {
-    "type": "MnistModel",       // name of model architecture to train
-    "args": {
-
-    }
+    "args": {},
+    "type": "MnistModel"        // name of model architecture to train
   },
   "data_loader": {
-    "type": "MnistDataLoader",         // selecting data loader
-    "args":{
-      "data_dir": "data/",             // dataset path
-      "batch_size": 64,                // batch size
-      "shuffle": true,                 // shuffle training data before splitting
-      "validation_split": 0.1          // size of validation dataset. float(portion) or int(number of samples)
-      "num_workers": 2,                // number of cpu processes to be used for data loading
+    "type": "MnistDataLoader",  // selecting data loader
+    "args": {
+      "batch_size": 128,        // dataset path
+      "data_dir": "data/",      // batch size
+      "num_workers": 2,         // shuffle training data before splitting
+      "shuffle": true,          // size of validation dataset. float(portion) or int(number of samples)
+      "validation_split": 0.1   // number of cpu processes to be used for data loading
     }
   },
+  "loss": "nll_loss",           // loss function
+  "lr_scheduler": {
+    "type": "StepLR",           // learning rate scheduler
+    "args": {
+      "gamma": 0.1,
+      "step_size": 50
+    }
+  },
+  "metrics": [                  // list of metrics to evaluate
+    "accuracy",
+    "top_k_acc"
+  ],
   "optimizer": {
     "type": "Adam",
-    "args":{
-      "lr": 0.001,                     // learning rate
-      "weight_decay": 0,               // (optional) weight decay
-      "amsgrad": true
-    }
-  },
-  "loss": "nll_loss",                  // loss
-  "metrics": [
-    "accuracy", "top_k_acc"            // list of metrics to evaluate
-  ],
-  "lr_scheduler": {
-    "type": "StepLR",                  // learning rate scheduler
-    "args":{
-      "step_size": 50,
-      "gamma": 0.1
+    "args": {
+      "amsgrad": true,
+      "lr": 0.001,              // learning rate
+      "weight_decay": 0         // (optional) weight decay
     }
   },
   "trainer": {
-    "epochs": 100,                     // number of training epochs
-    "save_dir": "saved/",              // checkpoints are saved in save_dir/models/name
-    "save_freq": 1,                    // save checkpoints every save_freq epochs
-    "verbosity": 2,                    // 0: quiet, 1: per epoch, 2: full
-
-    "monitor": "min val_loss"          // mode and metric for model performance monitoring. set 'off' to disable.
-    "early_stop": 10	                 // number of epochs to wait before early stop. set 0 to disable.
-
-    "tensorboard": true,               // enable tensorboard visualization
+    "early_stop": 10,           // number of epochs to wait before early stop. set 0 to disable.
+    "epochs": 100,              // number of training epochs
+    "monitor": "min val_loss",  // mode and metric for model performance monitoring. set 'off' to disable.
+    "save_dir": "saved/",       // checkpoints are saved in save_dir/models/name
+    "save_period": 1,           // save checkpoints every save_period epochs
+    "tensorboard": true,        // enable tensorboard visualization
+    "verbosity": 2              // 0: quiet, 1: per epoch, 2: full
   }
 }
+
 ```
 
 Add addional configurations if you need.
 
 ### Using config files
-Modify the configurations in `.json` config files, then run:
+Copy the default `configs/mnist.json` config file, modify it, then run:
 
   ```
-  python train.py --config config.json
+  python train.py -c configs/your_config.json
   ```
 
 ### Resuming from checkpoints
 You can resume from a previously saved checkpoint by:
 
   ```
-  python train.py --resume path/to/checkpoint
+  python train.py -r saved/models/path/to/checkpoint
   ```
 
 ### Using Multiple GPU
@@ -173,7 +182,7 @@ You can enable multi-GPU training by setting `n_gpu` argument of the config file
 If configured to use smaller number of gpu than available, first n devices will be used by default.
 Specify indices of available GPUs by cuda environmental variable.
   ```
-  python train.py --device 2,3 -c config.json
+  python train.py -d 2,3 -c config.json
   ```
   This is equivalent to
   ```
@@ -187,27 +196,21 @@ Use the `new_project.py` script to make your new project directory with template
 `python new_project.py ../NewProject` then a new project folder named 'NewProject' will be made.
 This script will filter out unneccessary files like cache, git files or readme file.
 
-### Custom CLI options
+### Overriding config options
 
 Changing values of config file is a clean, safe and easy way of tuning hyperparameters. However, sometimes
 it is better to have command line options if some values need to be changed too often or quickly.
 
-This template uses the configurations stored in the json file by default, but by registering custom options as follows
-you can change some of them using CLI flags.
+This template uses the configurations stored in the json file by default, we provide some arguments to override said configuration.
 
-  ```python
-  # simple class-like object having 3 attributes, `flags`, `type`, `target`.
-  CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
-  options = [
-      CustomArgs(['--lr', '--learning_rate'], type=float, target=('optimizer', 'args', 'lr')),
-      CustomArgs(['--bs', '--batch_size'], type=int, target=('data_loader', 'args', 'batch_size'))
-      # options added here can be modified by command line flags.
-  ]
+The default values disable this behavior.
+
   ```
-`target` argument should be sequence of keys, which are used to access that option in the config dict. In this example, `target`
-for the learning rate option is `('optimizer', 'args', 'lr')` because `config['optimizer']['args']['lr']` points to the learning rate.
-`python train.py -c config.json --bs 256` runs training with options given in `config.json` except for the `batch size`
-which is increased to 256 by command line options.
+    -l LEARNING_RATE, --learning_rate LEARNING_RATE
+                        Optionally set learning rate. Replaces the value from the given config file (default: -1)
+    -b BATCH_SIZE, --batch_size BATCH_SIZE
+                        Optionally set the batch size. Replaces the value from the given config file (default: -1)
+  ```
 
 
 ### Data Loader
@@ -356,23 +359,11 @@ If you need more visualizations, use `add_scalar('tag', data)`, `add_image('tag'
 **Note**: You don't have to specify current steps, since `WriterTensorboard` class defined at `logger/visualization.py` will track current steps.
 
 ## Contribution
-Feel free to contribute any kind of function or enhancement, here the coding style follows PEP8
-
-Code should pass the [Flake8](http://flake8.pycqa.org/en/latest/) check before committing.
-
-## TODOs
-
-- [ ] Multiple optimizers
-- [ ] Support more tensorboard functions
-- [x] Using fixed random seed
-- [x] Support pytorch native tensorboard
-- [x] `tensorboardX` logger support
-- [x] Configurable logging layout, checkpoint naming
-- [x] Iteration-based training (instead of epoch-based)
-- [x] Adding command line option for fine-tuning
+Check out [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 This project is licensed under the MIT License. See  LICENSE for more details
 
 ## Acknowledgements
-This project is inspired by the project [Tensorflow-Project-Template](https://github.com/MrGemy95/Tensorflow-Project-Template) by [Mahmoud Gemy](https://github.com/MrGemy95)
+This project is inspired by the project [Tensorflow-Project-Template](https://github.com/MrGemy95/Tensorflow-Project-Template) by [Mahmoud Gemy](https://github.com/MrGemy95).\
+This project is a fork of [victoresque/pytorch-template](https://github.com/victoresque/pytorch-template)
