@@ -23,7 +23,6 @@ ignore = [
     "saved",
     "new_project.py",
     "LICENSE",
-    ".flake8",
     "README.md",
     "__pycache__",
 ]

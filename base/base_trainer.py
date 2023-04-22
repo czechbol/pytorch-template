@@ -1,15 +1,34 @@
-import torch
 from abc import abstractmethod
+from typing import Callable, List, Type, Union
+
+import torch
 from numpy import inf
+
+from base.base_model import BaseModel
 from logger import TensorboardWriter
+from parse_config import ConfigParser
 
 
 class BaseTrainer:
-    """
-    Base class for all trainers
-    """
+    """Base class for all trainers."""
 
-    def __init__(self, model, criterion, metric_ftns, optimizer, config):
+    def __init__(
+        self,
+        model: Union[Type[BaseModel], torch.nn.DataParallel],
+        criterion: Callable,
+        metric_ftns: List[Callable],
+        optimizer: Type[torch.optim.Optimizer],
+        config: ConfigParser,
+    ):
+        """Initialize BaseTrainer.
+
+        Args:
+            model (Union[Type[BaseModel], torch.nn.DataParallel]): The model to train.
+            criterion (Callable): The loss function.
+            metric_ftns (List[Callable]): The metrics to compute and store.
+            optimizer (Type[torch.optim.Optimizer]): The optimizer to use.
+            config (ConfigParser): The configuration.
+        """
         self.config = config
         self.logger = config.get_logger("trainer", config["trainer"]["verbosity"])
 
@@ -19,9 +38,9 @@ class BaseTrainer:
         self.optimizer = optimizer
 
         cfg_trainer = config["trainer"]
-        self.epochs = cfg_trainer["epochs"]
-        self.save_period = cfg_trainer["save_period"]
-        self.monitor = cfg_trainer.get("monitor", "off")
+        self.epochs: int = cfg_trainer["epochs"]
+        self.save_period: int = cfg_trainer["save_period"]
+        self.monitor: str = cfg_trainer.get("monitor", "off")
 
         # configuration to monitor model performance and save best
         if self.monitor == "off":
@@ -31,10 +50,10 @@ class BaseTrainer:
             self.mnt_mode, self.mnt_metric = self.monitor.split()
             assert self.mnt_mode in ["min", "max"]
 
-            self.mnt_best = inf if self.mnt_mode == "min" else -inf
-            self.early_stop = cfg_trainer.get("early_stop", inf)
+            self.mnt_best = int(inf) if self.mnt_mode == "min" else int(-inf)
+            self.early_stop: int = cfg_trainer.get("early_stop", inf)
             if self.early_stop <= 0:
-                self.early_stop = inf
+                self.early_stop = int(inf)
 
         self.start_epoch = 1
 
@@ -49,18 +68,19 @@ class BaseTrainer:
             self._resume_checkpoint(config.resume)
 
     @abstractmethod
-    def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
+    def _train_epoch(self, epoch: int):
+        """Training logic for an epoch.
 
-        :param epoch: Current epoch number
+        Args:
+            epoch (int): Current epoch number
+
+        Raises:
+            NotImplementedError: In case the subclass does not implement this method.
         """
         raise NotImplementedError
 
     def train(self):
-        """
-        Full training logic
-        """
+        """Full training logic."""
         not_improved_count = 0
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)
@@ -110,13 +130,12 @@ class BaseTrainer:
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
-    def _save_checkpoint(self, epoch, save_best=False):
-        """
-        Saving checkpoints
+    def _save_checkpoint(self, epoch: int, save_best: bool = False):
+        """Save model checkpoint.
 
-        :param epoch: current epoch number
-        :param log: logging information of the epoch
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        Args:
+            epoch (int): current epoch number
+            save_best (bool, optional): If True, rename the saved checkpoint to 'model_best.pth'. Defaults to False.
         """
         arch = type(self.model).__name__
         state = {
@@ -135,13 +154,12 @@ class BaseTrainer:
             torch.save(state, best_path)
             self.logger.info("Saving current best: model_best.pth ...")
 
-    def _resume_checkpoint(self, resume_path):
-        """
-        Resume from saved checkpoints
+    def _resume_checkpoint(self, resume_path: str):
+        """Resume from saved checkpoints.
 
-        :param resume_path: Checkpoint path to be resumed
+        Args:
+            resume_path (_type_): Checkpoint path to be resumed
         """
-        resume_path = str(resume_path)
         self.logger.info("Loading checkpoint: {} ...".format(resume_path))
         checkpoint = torch.load(resume_path)
         self.start_epoch = checkpoint["epoch"] + 1

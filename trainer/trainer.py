@@ -1,28 +1,46 @@
+from typing import Callable, Dict, List, Optional, Type, Union
+
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
+
 from base import BaseTrainer
-from utils import inf_loop, MetricTracker
+from base.base_model import BaseModel
+from parse_config import ConfigParser
+from utils import MetricTracker, inf_loop
 
 
 class Trainer(BaseTrainer):
-    """
-    Trainer class
-    """
+    """Trainer class."""
 
     def __init__(
         self,
-        model,
-        criterion,
-        metric_ftns,
-        optimizer,
-        config,
-        device,
-        data_loader,
-        valid_data_loader=None,
-        lr_scheduler=None,
-        len_epoch=None,
+        model: Union[Type[BaseModel], torch.nn.DataParallel],
+        criterion: Callable,
+        metric_ftns: List[Callable],
+        optimizer: Type[torch.optim.Optimizer],
+        config: ConfigParser,
+        device: torch.device,
+        data_loader: Type[DataLoader],
+        valid_data_loader: Optional[Type[DataLoader]] = None,
+        lr_scheduler: Optional[Type[torch.optim.lr_scheduler.LRScheduler]] = None,
+        len_epoch: Optional[int] = None,
     ):
+        """Initialize trainer.
+
+        Args:
+            model (Union[Type[BaseModel], torch.nn.DataParallel]): The model to train.
+            criterion (Callable): The loss function.
+            metric_ftns (List[Callable]): The metrics to compute and store.
+            optimizer (Type[torch.optim.Optimizer]): The optimizer to use.
+            config (ConfigParser): The configuration.
+            device (torch.device): Device on which the code should run.
+            data_loader (Type[BaseDataLoader]): Data loader to use.
+            valid_data_loader (Optional[Type[BaseDataLoader]], optional): Validation set Data loader. Defaults to None.
+            lr_scheduler (Optional[Type[torch.optim.lr_scheduler.LRScheduler]], optional): LR Scheduler. Defaults to None.
+            len_epoch (Optional[int], optional): Epoch length. Defaults to None.
+        """
         super().__init__(model, criterion, metric_ftns, optimizer, config)
         self.config = config
         self.device = device
@@ -46,12 +64,14 @@ class Trainer(BaseTrainer):
             "loss", *[m.__name__ for m in self.metric_ftns], writer=self.writer
         )
 
-    def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
+    def _train_epoch(self, epoch: int) -> Dict[str, float]:
+        """Training logic for an epoch.
 
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains average loss and metric in this epoch.
+        Args:
+            epoch (int): Integer, current training epoch.
+
+        Returns:
+            Dict[str, float]: A log that contains average loss and metric in this epoch.
         """
         self.model.train()
         self.train_metrics.reset()
@@ -91,12 +111,14 @@ class Trainer(BaseTrainer):
             self.lr_scheduler.step()
         return log
 
-    def _valid_epoch(self, epoch):
-        """
-        Validate after training an epoch
+    def _valid_epoch(self, epoch: int) -> Dict[str, float]:
+        """Validate after training an epoch
 
-        :param epoch: Integer, current training epoch.
-        :return: A log that contains information about validation
+        Args:
+            epoch (int): Current training epoch.
+
+        Returns:
+            Dict[str, float]: A log that contains information about validation
         """
         self.model.eval()
         self.valid_metrics.reset()
@@ -122,7 +144,15 @@ class Trainer(BaseTrainer):
             self.writer.add_histogram(name, p, bins="auto")
         return self.valid_metrics.result()
 
-    def _progress(self, batch_idx):
+    def _progress(self, batch_idx: int) -> str:
+        """Get training progress.
+
+        Args:
+            batch_idx (int): Index of current batch.
+
+        Returns:
+            str: Progress message.
+        """
         base = "[{}/{} ({:.0f}%)]"
         if hasattr(self.data_loader, "n_samples"):
             current = batch_idx * self.data_loader.batch_size

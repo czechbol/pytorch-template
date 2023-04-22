@@ -1,20 +1,33 @@
 import importlib
 from datetime import datetime
+import logging
+from pathlib import Path
+from types import ModuleType
+from typing import Optional
 
 
 class TensorboardWriter:
-    def __init__(self, log_dir, logger, enabled):
-        self.writer = None
+    """Tensorboard writer class."""
+
+    def __init__(self, log_dir: Path, logger: logging.Logger, enabled: bool):
+        """Initialize a TensorboardWriter.
+
+        Args:
+            log_dir (Path): Log directory
+            logger (logging.Logger): Logger instance
+            enabled (bool): _description_
+        """
+        self.writer: Optional[ModuleType] = None
         self.selected_module = ""
 
         if enabled:
-            log_dir = str(log_dir)
+            log_str = str(log_dir)
 
             # Retrieve vizualization writer.
             succeeded = False
             for module in ["torch.utils.tensorboard", "tensorboardX"]:
                 try:
-                    self.writer = importlib.import_module(module).SummaryWriter(log_dir)
+                    self.writer = importlib.import_module(module).SummaryWriter(log_str)
                     succeeded = True
                     break
                 except ImportError:
@@ -46,7 +59,13 @@ class TensorboardWriter:
         self.tag_mode_exceptions = {"add_histogram", "add_embedding"}
         self.timer = datetime.now()
 
-    def set_step(self, step, mode="train"):
+    def set_step(self, step: int, mode="train"):
+        """Set the current step.
+
+        Args:
+            step (int): Step number
+            mode (str, optional): Step mode. Defaults to "train".
+        """
         self.mode = mode
         self.step = step
         if step == 0:

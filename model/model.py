@@ -1,10 +1,18 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from base import BaseModel
 
 
 class MnistModel(BaseModel):
+    """Mnist Model."""
+
     def __init__(self, num_classes=10):
+        """Initializes the model.
+
+        Args:
+            num_classes (int, optional): Number of classes. Defaults to 10.
+        """
         super().__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
@@ -12,7 +20,15 @@ class MnistModel(BaseModel):
         self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward function.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
         x = x.view(-1, 320)

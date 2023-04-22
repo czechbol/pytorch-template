@@ -1,6 +1,8 @@
 import argparse
+
 import torch
 from tqdm import tqdm
+
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
@@ -76,24 +78,33 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default=None,
+        default="",
         type=str,
         help="config file path (default: None)",
     )
     args.add_argument(
         "-r",
         "--resume",
-        default=None,
+        default="",
         type=str,
         help="path to latest checkpoint (default: None)",
     )
     args.add_argument(
         "-d",
         "--device",
-        default=None,
+        default="",
         type=str,
         help="indices of GPUs to enable (default: all)",
     )
+    args.add_argument(
+        "-b",
+        "--batch_size",
+        default=-1,
+        type=int,
+        help="Optionally set the batch size. Replaces the value from the given config file (default: -1)",
+    )
+    parsed_args = args.parse_args()
 
-    config = ConfigParser.from_args(args)
+    config = ConfigParser.from_args(parsed_args)
+
     main(config)
