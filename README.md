@@ -56,7 +56,7 @@ $ python3 -m venv .venv
 $ source .venv/bin/activate
 # Check if the environment is correctly initialized
 $ which python # should output something like: ~/path/to/project/.venv/bin/python
-$ python -m pip --upgrade pip
+$ python -m pip install --upgrade pip
 $ python -m pip install -r requirements.txt
 ```
 
